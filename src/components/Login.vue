@@ -46,6 +46,7 @@ export default {
       return cipher.toString(CryptoJS.enc.Utf8)
     },
     createPost() {
+      console.log('Dio porco');
       axios
         .post('http://113.30.150.109:3000/auth/sign-in', this.aesEncrypt(JSON.stringify(this.loginData)), {headers: {"Content-Type": "text/plain"}})
         .then((res) => {
