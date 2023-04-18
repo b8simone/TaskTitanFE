@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/TaskTitan/',
+  base: '/TaskTitanFE/',
   plugins: [vue()],
   resolve: {
     alias: {
