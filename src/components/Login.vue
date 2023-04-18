@@ -1,18 +1,18 @@
 <script>
-import { ref } from 'vue'
-import axios from 'axios'
-import CryptoJS from 'crypto-js'
+import { ref } from 'vue';
+import axios from 'axios';
+import CryptoJS from 'crypto-js';
 
-const key = '@McQfTjWnZr4u7x!A%D*F-JaNdRgUkXp'
-const iv = 'aL?;+EWW9iaCPp{e'
+const key = '@McQfTjWnZr4u7x!A%D*F-JaNdRgUkXp';
+const iv = 'aL?;+EWW9iaCPp{e';
 
 export default {
-  data() {
+  setup() {
 
-    const loginData = ref({
-      email: '',
-      password: ''
-    })
+    let loginData = {
+      email: "",
+      password: ""
+    }
 
     return {
       loginData
@@ -20,87 +20,40 @@ export default {
   },
 
   methods: {
-    createPost() {
 
-      const daje = JSON.stringify(this.loginData)
-
-      console.log('daje  ' + daje)
-      const cipher = CryptoJS.AES.encrypt(daje, CryptoJS.enc.Utf8.parse(key), {
-        iv: CryptoJS.enc.Utf8.parse(iv),
-        mode: CryptoJS.mode.CBC,
-        format: CryptoJS.format.Hex
-      })
-
-      console.log('stringa criptata ' + cipher.toString())
-
-      
-
-      axios
-        .post('http://113.30.150.109:3000/auth/sign-in', cipher.toString())
-        .then((res) => {
-          console.log('response ' + res.data)
-
-          const decipher = CryptoJS.AES.decrypt(
-            res.data.toString(),  
-            CryptoJS.enc.Utf8.parse(key),
-            {
-              iv: CryptoJS.enc.Utf8.parse(iv),
-              mode: CryptoJS.mode.CBC
-            }
-          )
-
-          console.log(CryptoJS.enc.Utf8.stringify(decipher).toString())
-        })
-        .catch((error) => {
-          
-          console.log('errore ' + error.response.data.toString())
-
-          const erroreDecifrato = JSON.stringify(error.response.data)
-
-          const decipher = CryptoJS.AES.decrypt(
-            JSON.stringify(error.response.data),
-            CryptoJS.enc.Utf8.parse(key),
-            {
-              iv: CryptoJS.enc.Utf8.parse(iv),
-              mode: CryptoJS.mode.CBC,
-              padding: CryptoJS.pad.Pkcs7
-            }
-          )
-
-          
-          console.log('stringa decifrata 2 ' + decipher)
-        })
-
-      // axios.post('http://113.30.150.109:3000/auth/sign-in', this.loginData).then((response) => {
-      //   console.log(response.data)
-
-      //   const decipher = CryptoJS.AES.decrypt(response.data, CryptoJS.enc.Utf8.parse(key), {
-      //     iv: CryptoJS.enc.Utf8.parse(iv),
-      //     mode: CryptoJS.mode.CBC
-      //   })
-
-      //   console.log(CryptoJS.enc.Utf8.stringify(decipher).toString())
-      // })
-    },
     aesEncrypt(txt) {
       const cipher = CryptoJS.AES.encrypt(txt, CryptoJS.enc.Utf8.parse(key), {
         iv: CryptoJS.enc.Utf8.parse(iv),
-        mode: CryptoJS.mode.CBC
+        mode: CryptoJS.mode.CBC,
+        format: CryptoJS.format.Hex,
+        padding: CryptoJS.pad.Pkcs7
       })
 
-      this.stringa_tre = cipher.toString()
+      //this.stringa_tre = cipher.toString()
 
       return cipher.toString()
     },
     aesDencrypt(txt) {
       const cipher = CryptoJS.AES.decrypt(txt, CryptoJS.enc.Utf8.parse(key), {
         iv: CryptoJS.enc.Utf8.parse(iv),
-        mode: CryptoJS.mode.CBC
+        mode: CryptoJS.mode.CBC,
+        format: CryptoJS.format.Hex,
+        padding: CryptoJS.pad.Pkcs7
       })
 
-      this.stringa_quattro = CryptoJS.enc.Utf8.stringify(cipher).toString()
+      //this.stringa_quattro = CryptoJS.enc.Utf8.stringify(cipher).toString()
 
-      return CryptoJS.enc.Utf8.stringify(cipher).toString()
+      return cipher.toString(CryptoJS.enc.Utf8)
+    },
+    createPost() {
+      axios
+        .post('http://113.30.150.109:3000/auth/sign-in', this.aesEncrypt(JSON.stringify(this.loginData)), {headers: {"Content-Type": "text/plain"}})
+        .then((res) => {
+          console.log(JSON.parse(this.aesDencrypt(res.data)));
+        })
+        .catch((error) => {
+          console.log(this.aesDencrypt(error.response.data));
+        })
     }
   }
 }
@@ -109,15 +62,15 @@ export default {
 <template>
   <main>
     <!-- <div style="position: absolute; top: 200px; left: 300px; background-color: white; padding: 3rem;">
-      <input type="text" v-model="stringa_uno">
-      <input type="text" v-model="stringa_due">
+              <input type="text" v-model="stringa_uno">
+              <input type="text" v-model="stringa_due">
 
-      <button @click="aesEncrypt(stringa_uno)">Crypta</button>
-      <button @click="aesDencrypt(stringa_tre)">Decrypta</button>
+              <button @click="aesEncrypt(stringa_uno)">Crypta</button>
+              <button @click="aesDencrypt(stringa_tre)">Decrypta</button>
 
-      <p>{{ stringa_tre }}</p>
-      <p>{{ stringa_quattro }}</p>
-    </div> -->
+              <p>{{ stringa_tre }}</p>
+              <p>{{ stringa_quattro }}</p>
+            </div> -->
 
     <div class="login_container">
       <div id="form">
